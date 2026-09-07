@@ -1,0 +1,123 @@
+{
+  "name": "极简大片版 (Editorial Minimal)",
+  "version": "1.0.0",
+  "description": "无界全屏通透大片版，适合小红书、杂志风与现代生活方式分享",
+  "dimensions": {
+    "width": 1152,
+    "height": 2048
+  },
+  "layers": [
+    {
+      "id": "top_shadow",
+      "type": "gradient",
+      "direction": "vertical",
+      "y": 0,
+      "height": 450,
+      "stops": [
+        { "offset": 0, "color": "rgba(0, 0, 0, 0.75)" },
+        { "offset": 1, "color": "rgba(0, 0, 0, 0)" }
+      ]
+    },
+    {
+      "id": "bottom_shadow",
+      "type": "gradient",
+      "direction": "vertical",
+      "y": 850,
+      "height": 1198,
+      "stops": [
+        { "offset": 0, "color": "rgba(0, 0, 0, 0)" },
+        { "offset": 0.35, "color": "rgba(10, 14, 18, 0.78)" },
+        { "offset": 0.7, "color": "rgba(10, 14, 18, 0.94)" },
+        { "offset": 1, "color": "rgba(10, 14, 18, 0.98)" }
+      ]
+    },
+    {
+      "id": "eyebrow",
+      "type": "text",
+      "binding": "number",
+      "x": 576,
+      "y": 950,
+      "fontSize": 24,
+      "fontFamily": "system-ui, sans-serif",
+      "fontWeight": "600",
+      "color": "rgba(220, 192, 126, 0.9)",
+      "align": "center"
+    },
+    {
+      "id": "main_title",
+      "type": "text",
+      "binding": "topic",
+      "x": 576,
+      "y": 1080,
+      "fontSize": 90,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "900",
+      "color": "#ffffff",
+      "align": "center",
+      "shadow": { "color": "rgba(0,0,0,0.8)", "blur": 16, "y": 6 }
+    },
+    {
+      "id": "body_text",
+      "type": "text",
+      "binding": "content",
+      "x": 576,
+      "y": 1240,
+      "fontSize": 33,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "500",
+      "color": "#f1f5f9",
+      "align": "center",
+      "maxWidth": 860,
+      "lineHeight": 60,
+      "shadow": { "color": "rgba(0,0,0,0.6)", "blur": 8, "y": 2 }
+    },
+    {
+      "id": "sub_endorsement",
+      "type": "text",
+      "binding": "subtext",
+      "x": 576,
+      "y": 1460,
+      "fontSize": 28,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "600",
+      "color": "#dcc07e",
+      "align": "center",
+      "maxWidth": 860,
+      "lineHeight": 54
+    },
+    {
+      "id": "divider_line",
+      "type": "line",
+      "x1": 400,
+      "y1": 1750,
+      "x2": 752,
+      "y2": 1750,
+      "lineWidth": 1.5,
+      "color": "rgba(212, 175, 55, 0.45)"
+    },
+    {
+      "id": "footer_greeting",
+      "type": "text",
+      "binding": "greeting",
+      "x": 576,
+      "y": 1835,
+      "fontSize": 38,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "600",
+      "color": "#ffffff",
+      "align": "center"
+    },
+    {
+      "id": "footer_signature",
+      "type": "text",
+      "binding": "signature",
+      "x": 576,
+      "y": 1915,
+      "fontSize": 32,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "700",
+      "color": "#dcc07e",
+      "align": "center"
+    }
+  ]
+}

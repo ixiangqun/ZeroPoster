@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ZeroPosterTemplate",
+  "description": "ZeroPoster 标准海报模板描述协议",
+  "type": "object",
+  "required": ["name", "version", "dimensions", "layers"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "模板名称"
+    },
+    "version": {
+      "type": "string",
+      "description": "模板协议版本，如 1.0.0"
+    },
+    "description": {
+      "type": "string"
+    },
+    "dimensions": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": { "type": "integer", "default": 1152 },
+        "height": { "type": "integer", "default": 2048 }
+      }
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["text", "gradient", "line", "rect", "image"]
+          },
+          "binding": {
+            "type": "string",
+            "description": "动态数据绑定槽位键名，如 title, content, greeting, date"
+          },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "width": { "type": "number" },
+          "height": { "type": "number" },
+          "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+          "orientation": {
+            "type": "string",
+            "enum": ["horizontal", "vertical"]
+          },
+          "fontSize": { "type": "number" },
+          "fontFamily": { "type": "string" },
+          "fontWeight": { "type": "string" },
+          "color": { "type": "string" },
+          "align": { "type": "string", "enum": ["left", "center", "right"] },
+          "lineHeight": { "type": "number" },
+          "maxWidth": { "type": "number" },
+          "stops": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "offset": { "type": "number" },
+                "color": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

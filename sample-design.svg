@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1152 2048" width="1152" height="2048">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#111827" stop-opacity="0.6" />
+      <stop offset="60%" stop-color="#0f172a" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#020617" stop-opacity="0.98" />
+    </linearGradient>
+  </defs>
+
+  <!-- 背景遮罩 -->
+  <rect width="1152" height="2048" fill="url(#bgGrad)" />
+
+  <!-- 边框装饰 -->
+  <rect x="60" y="60" width="1032" height="1928" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-opacity="0.2" />
+
+  <!-- 语义化数据插槽节点 (由 DesignImporter 动态识别与替换) -->
+  <text id="field_number" x="576" y="240" font-family="system-ui, sans-serif" font-size="28" font-weight="600" fill="#94a3b8" text-anchor="middle" letter-spacing="4">
+    ZEROPOSTER / ISSUE NO.01
+  </text>
+
+  <text id="field_topic" x="576" y="980" font-family="'Noto Serif SC', serif" font-size="88" font-weight="900" fill="#ffffff" text-anchor="middle">
+    外部矢量设计导入
+  </text>
+
+  <text id="field_content" x="576" y="1160" font-family="'Noto Serif SC', serif" font-size="34" font-weight="500" fill="#cbd5e1" text-anchor="middle">
+    设计师在 Figma 或 Illustrator 中导出的标准矢量设计，通过语义插槽一键渲染。
+  </text>
+
+  <line x1="450" y1="1700" x2="702" y2="1700" stroke="#94a3b8" stroke-width="1.5" stroke-opacity="0.4" />
+
+  <text id="field_greeting" x="576" y="1790" font-family="system-ui, sans-serif" font-size="36" font-weight="600" fill="#ffffff" text-anchor="middle">
+    早安，保持思考与创造。
+  </text>
+
+  <text id="field_signature" x="576" y="1870" font-family="system-ui, sans-serif" font-size="30" font-weight="700" fill="#38bdf8" text-anchor="middle">
+    ZeroPoster · Client Compositor
+  </text>
+</svg>

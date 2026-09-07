@@ -1,0 +1,110 @@
+{
+  "name": "极客暗黑金句版 (Dark Mode Card)",
+  "version": "1.0.0",
+  "description": "现代冷调工业风，适合读书笔记、播客金句与极客观点分享",
+  "dimensions": {
+    "width": 1152,
+    "height": 2048
+  },
+  "layers": [
+    {
+      "id": "dark_overlay",
+      "type": "gradient",
+      "direction": "vertical",
+      "y": 0,
+      "height": 2048,
+      "stops": [
+        { "offset": 0, "color": "rgba(15, 20, 25, 0.65)" },
+        { "offset": 0.5, "color": "rgba(11, 15, 20, 0.88)" },
+        { "offset": 1, "color": "rgba(7, 10, 14, 0.98)" }
+      ]
+    },
+    {
+      "id": "badge_box",
+      "type": "rect",
+      "x": 100,
+      "y": 240,
+      "width": 260,
+      "height": 50,
+      "fill": "rgba(56, 189, 248, 0.12)",
+      "stroke": "rgba(56, 189, 248, 0.4)",
+      "strokeWidth": 1.5
+    },
+    {
+      "id": "badge_text",
+      "type": "text",
+      "binding": "number",
+      "x": 230,
+      "y": 273,
+      "fontSize": 20,
+      "fontFamily": "ui-monospace, monospace",
+      "fontWeight": "700",
+      "color": "#38bdf8",
+      "align": "center"
+    },
+    {
+      "id": "quote_mark",
+      "type": "text",
+      "content": "“",
+      "x": 100,
+      "y": 620,
+      "fontSize": 180,
+      "fontFamily": "Georgia, serif",
+      "fontWeight": "900",
+      "color": "rgba(56, 189, 248, 0.25)",
+      "align": "left"
+    },
+    {
+      "id": "core_quote",
+      "type": "text",
+      "binding": "content",
+      "x": 100,
+      "y": 720,
+      "fontSize": 48,
+      "fontFamily": "-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif",
+      "fontWeight": "800",
+      "color": "#ffffff",
+      "align": "left",
+      "maxWidth": 950,
+      "lineHeight": 80
+    },
+    {
+      "id": "author_title",
+      "type": "text",
+      "binding": "topic",
+      "x": 100,
+      "y": 1400,
+      "fontSize": 36,
+      "fontFamily": "-apple-system, sans-serif",
+      "fontWeight": "700",
+      "color": "#38bdf8",
+      "align": "left"
+    },
+    {
+      "id": "sub_context",
+      "type": "text",
+      "binding": "subtext",
+      "x": 100,
+      "y": 1480,
+      "fontSize": 26,
+      "fontFamily": "-apple-system, sans-serif",
+      "fontWeight": "400",
+      "color": "#94a3b8",
+      "align": "left",
+      "maxWidth": 950,
+      "lineHeight": 44
+    },
+    {
+      "id": "footer_sign",
+      "type": "text",
+      "binding": "signature",
+      "x": 100,
+      "y": 1880,
+      "fontSize": 30,
+      "fontFamily": "ui-monospace, monospace",
+      "fontWeight": "600",
+      "color": "#64748b",
+      "align": "left"
+    }
+  ]
+}

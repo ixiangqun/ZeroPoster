@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ZeroPoster · 纯客户端高保真排版与海报合成引擎</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0d12;
+      --card-dark: #12161f;
+      --border-dark: #222a36;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-gold: #c59b4b;
+      --accent-gold-light: #ecd29b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #0f131a;
+      border-bottom: 1px solid var(--border-dark);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff;
+      font-weight: 900;
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      letter-spacing: 1px;
+    }
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    button.btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #ffffff;
+      box-shadow: 0 2px 10px rgba(14, 165, 233, 0.3);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      background: #171d26;
+      border: 1px solid var(--border-dark);
+      color: var(--text-main);
+    }
+    .btn-outline:hover {
+      background: #1f2733;
+      border-color: #3b4656;
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+    }
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 500px 1fr;
+      gap: 24px;
+      padding: 20px 28px;
+      max-width: 1700px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .panel {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      height: fit-content;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-dark);
+      padding-bottom: 7px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    input, select, textarea {
+      background: #0a0d12;
+      border: 1px solid var(--border-dark);
+      border-radius: 6px;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent-blue);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+      line-height: 1.55;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .template-btn {
+      padding: 10px 6px;
+      background: #0d1117;
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      color: #cbd5e1;
+      font-size: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .template-btn:hover { border-color: #475569; }
+    .template-btn.active {
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      font-weight: 700;
+    }
+    .file-upload-box {
+      border: 1px dashed var(--border-dark);
+      border-radius: 8px;
+      padding: 16px 14px;
+      text-align: center;
+      background: #0a0d12;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      user-select: none;
+    }
+    .file-upload-box:hover {
+      border-color: var(--accent-blue);
+      color: #e2e8f0;
+    }
+    .kbd-tag {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: var(--accent-blue);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+    .slider-box {
+      background: #0c1017;
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slider-row {
+      display: grid;
+      grid-template-columns: 80px 1fr 45px;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+    .slider-row input[type="range"] {
+      padding: 0;
+      cursor: pointer;
+      accent-color: var(--accent-blue);
+    }
+    .slider-val {
+      font-family: monospace;
+      color: var(--accent-blue);
+      text-align: right;
+    }
+    .info-card {
+      background: #0c1017;
+      border: 1px solid var(--border-dark);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+    .info-title {
+      font-weight: 700;
+      color: var(--accent-blue);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .copy-btn {
+      font-size: 11px;
+      padding: 3px 8px;
+      background: #171d26;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .copy-btn:hover {
+      background: #242e3d;
+      color: #fff;
+    }
+    .preview-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+    }
+    .preview-wrapper {
+      position: relative;
+      background: #000;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.7);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1f2733;
+      width: 450px;
+      max-width: 100%;
+      aspect-ratio: 9 / 16;
+      height: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      touch-action: none;
+    }
+    .preview-wrapper:active { cursor: grabbing; }
+    #previewCanvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .preview-hints {
+      font-size: 12px;
+      color: #64748b;
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .mobile-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 13, 18, 0.94);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-dark);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      z-index: 900;
+      display: none;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 10px;
+    }
+    @media (max-width: 900px) {
+      body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
+      header { padding: 10px 14px; }
+      .brand-sub, .header-actions { display: none; }
+      main { grid-template-columns: 1fr; padding: 12px; gap: 16px; }
+      .preview-area { order: -1; }
+      .preview-wrapper { width: min(100%, 340px); margin: 0 auto; }
+      .panel { padding: 14px; gap: 14px; }
+      .mobile-bottom-bar { display: grid; }
+      .slider-row { grid-template-columns: 75px 1fr 40px; gap: 6px; }
+    }
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 10px 18px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-blue);
+      font-size: 13px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-box">
+      <div class="brand-badge">ZeroPoster</div>
+      <div>
+        <div class="brand-title">ZeroPoster · 纯客户端高保真排版与海报合成引擎</div>
+        <div class="brand-sub">Zero-Backend • Zero-API-Cost • CJK Kinsoku Shori • SVG Semantic Importer</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" id="importDesignBtn">📂 导入外部设计 (SVG/JSON)</button>
+      <button class="btn btn-primary" id="exportBtn">📥 导出 1152×2048 高清海报</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel">
+      <!-- 模板选择 -->
+      <div class="form-group">
+        <div class="section-title">
+          <span>1. 视觉模板预设</span>
+          <span style="font-size:11px; color:#64748b; font-weight:normal;">动态 Schema 驱动</span>
+        </div>
+        <div class="template-grid">
+          <button class="template-btn active" data-template="minimal">极简大片版<br><small style="color:#64748b">现代杂志风</small></button>
+          <button class="template-btn" data-template="classic">金石宋韵版<br><small style="color:#64748b">东方竖排风</small></button>
+          <button class="template-btn" data-template="dark">极客暗黑版<br><small style="color:#64748b">观点金句风</small></button>
+        </div>
+      </div>
+
+      <!-- 外部设计文件载入 -->
+      <input type="file" id="designFileInput" accept=".svg,.json" style="display:none;">
+
+      <!-- 背景图层载入 -->
+      <div class="form-group">
+        <div class="section-title">
+          <span>2. 视觉背景注入</span>
+          <button class="copy-btn" id="resetImgTransformBtn">↺ 重置位置与缩放</button>
+        </div>
+        <div class="file-upload-box" id="uploadTrigger">
+          <span style="font-size: 20px;">🖼️</span>
+          <span>点击选择 / 拖拽背景大片至此</span>
+          <span style="font-size:11px; color:#64748b;">支持全局快捷键 <span class="kbd-tag">Ctrl + V</span> / <span class="kbd-tag">Cmd + V</span> 粘贴</span>
+          <span style="font-size:11px; color:#64748b;">支持在预览画布上<strong>单指 / 鼠标左键拖拽平移，滚轮缩放</strong></span>
+          <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
+        </div>
+      </div>
+
+      <!-- 图像微调滑块 -->
+      <div class="slider-box">
+        <div class="slider-row">
+          <span>上下位移 (Y)</span>
+          <input type="range" id="imgOffsetYInput" min="-600" max="600" value="0" step="2">
+          <span class="slider-val" id="imgOffsetYVal">0px</span>
+        </div>
+        <div class="slider-row">
+          <span>左右位移 (X)</span>
+          <input type="range" id="imgOffsetXInput" min="-400" max="400" value="0" step="2">
+          <span class="slider-val" id="imgOffsetXVal">0px</span>
+        </div>
+        <div class="slider-row">
+          <span>画面缩放 (Zoom)</span>
+          <input type="range" id="imgZoomInput" min="30" max="250" value="100" step="1">
+          <span class="slider-val" id="imgZoomVal">100%</span>
+        </div>
+      </div>
+
+      <!-- AI 提示词桥接器 -->
+      <div class="info-card">
+        <div class="info-title">
+          <span>📷 AI 提示词桥接器 (单反写实无文字 Prompt)</span>
+          <button class="copy-btn" id="copyPromptBtn">一键复制 Prompt</button>
+        </div>
+        <div style="margin-bottom: 8px;">
+          <select id="promptModeSelect" style="width: 100%; font-size: 11.5px; padding: 4px 8px;">
+            <option value="macro">微距材质 / 静物特写 (Macro RAW)</option>
+            <option value="craft">人文纪实 / 手作匠心 (Documentary)</option>
+            <option value="zen">东方禅意 / 案头雅集 (Zen Atmosphere)</option>
+            <option value="nature">自然生境 / 古树林野 (Wild Nature)</option>
+            <option value="interior">文房空间 / 现代生活 (Modern Interior)</option>
+            <option value="tech">现代极客 / 冷调先锋 (Industrial Tech)</option>
+          </select>
+        </div>
+        <div id="promptOutput" style="color: #cbd5e1; font-size: 11px; line-height: 1.5; word-break: break-all;"></div>
+      </div>
+
+      <!-- 结构化数据排印表单 -->
+      <div class="section-title">3. 卡片数据排印 (GB/T 15834 避头尾)</div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>期号标识 (number)</label>
+          <input type="text" id="inputNumber" value="ZEROPOSTER / ISSUE NO.01">
+        </div>
+        <div class="form-group">
+          <label>核心主题 (topic)</label>
+          <input type="text" id="inputTopic" value="分层混合渲染">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>核心文案 / 知识点 (content)</label>
+        <textarea id="inputContent" rows="3">让生成式 AI 负责纯净无字的质感摄影，让前端 Canvas 负责严格像素级的 CJK 避头尾排印，实现零成本、高保真的海报交付。</textarea>
+      </div>
+
+      <div class="form-group">
+        <label>副标题 / 背书说明 (subtext)</label>
+        <input type="text" id="inputSubtext" value="纯客户端本地运行 · 零服务器与 API 消耗 · 毫秒级即时导出">
+      </div>
+
+      <div class="form-group">
+        <label>结尾寄语 / 观点 (greeting)</label>
+        <input type="text" id="inputGreeting" value="早安，保持思考与创造。">
+      </div>
+
+      <div class="form-group">
+        <label>品牌 / 署名落款 (signature)</label>
+        <input type="text" id="inputSignature" value="ZeroPoster · Client Compositor">
+      </div>
+    </div>
+
+    <!-- 右侧画布实时预览 -->
+    <div class="preview-area">
+      <div class="preview-wrapper" id="previewWrapper" title="可直接在画面上按住鼠标左键或单指拖拽平移">
+        <canvas id="previewCanvas" width="1152" height="2048"></canvas>
+      </div>
+      <div class="preview-hints">
+        <span>画布规格：1152 × 2048 像素 (9:16)</span>
+        <span>GB/T 15834 标点悬挂 · 绝对防画布污染</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- 移动端专属悬浮底栏 -->
+  <div class="mobile-bottom-bar">
+    <button class="btn btn-outline" id="mobileImportBtn" style="justify-content:center; font-size:12px; padding:10px 8px;">📂 导入设计</button>
+    <button class="btn btn-primary" id="mobileExportBtn" style="justify-content:center; font-size:12px; padding:10px 8px;">📥 导出海报</button>
+  </div>
+
+  <div id="toast">已成功复制到剪贴板</div>
+
+  <!-- 引入核心模块 -->
+  <script src="core/KinsokuEngine.js"></script>
+  <script src="core/CanvasCompositor.js"></script>
+  <script src="core/DesignImporter.js"></script>
+  <script src="core/PromptBridge.js"></script>
+
+  <script>
+    // 实例化核心组件
+    const canvas = document.getElementById('previewCanvas');
+    const wrapper = document.getElementById('previewWrapper');
+    const compositor = new CanvasCompositor(canvas, wrapper, {
+      width: 1152,
+      height: 2048,
+      onTransformChange: (st) => {
+        imgOffsetXInput.value = st.offsetX;
+        imgOffsetYInput.value = st.offsetY;
+        imgZoomInput.value = st.zoom;
+        imgOffsetXVal.textContent = st.offsetX + 'px';
+        imgOffsetYVal.textContent = st.offsetY + 'px';
+        imgZoomVal.textContent = st.zoom + '%';
+      }
+    });
+
+    const importer = new DesignImporter();
+
+    // 预置内联模板
+    const PRESET_TEMPLATES = {
+      minimal: null,
+      classic: null,
+      dark: null
+    };
+
+    let currentTemplate = null;
+    let externalSvgImage = null;
+
+    // DOM 元素引用
+    const inputNumber = document.getElementById('inputNumber');
+    const inputTopic = document.getElementById('inputTopic');
+    const inputContent = document.getElementById('inputContent');
+    const inputSubtext = document.getElementById('inputSubtext');
+    const inputGreeting = document.getElementById('inputGreeting');
+    const inputSignature = document.getElementById('inputSignature');
+    const promptModeSelect = document.getElementById('promptModeSelect');
+    const promptOutput = document.getElementById('promptOutput');
+
+    const imgOffsetXInput = document.getElementById('imgOffsetXInput');
+    const imgOffsetYInput = document.getElementById('imgOffsetYInput');
+    const imgZoomInput = document.getElementById('imgZoomInput');
+    const imgOffsetXVal = document.getElementById('imgOffsetXVal');
+    const imgOffsetYVal = document.getElementById('imgOffsetYVal');
+    const imgZoomVal = document.getElementById('imgZoomVal');
+    const resetImgTransformBtn = document.getElementById('resetImgTransformBtn');
+
+    const uploadTrigger = document.getElementById('uploadTrigger');
+    const bgFileInput = document.getElementById('bgFileInput');
+    const designFileInput = document.getElementById('designFileInput');
+    const importDesignBtn = document.getElementById('importDesignBtn');
+    const mobileImportBtn = document.getElementById('mobileImportBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const mobileExportBtn = document.getElementById('mobileExportBtn');
+    const toast = document.getElementById('toast');
+
+    // 组装当前业务数据表
+    function getCurrentData() {
+      return {
+        number: inputNumber.value,
+        topic: inputTopic.value,
+        content: inputContent.value,
+        subtext: inputSubtext.value,
+        greeting: inputGreeting.value,
+        signature: inputSignature.value
+      };
+    }
+
+    // 更新 AI 提示词显示
+    function updatePrompt() {
+      const mode = promptModeSelect.value;
+      const prompt = PromptBridge.buildPrompt({
+        topic: inputTopic.value,
+        visual: inputContent.value,
+        mode: mode
+      });
+      promptOutput.textContent = prompt;
+    }
+
+    // 注册渲染管线
+    compositor.setRenderPipeline((ctx, width, height) => {
+      // 若有外部导入的 SVG 设计图像，优先绘制
+      if (externalSvgImage) {
+        ctx.drawImage(externalSvgImage, 0, 0, width, height);
+        return;
+      }
+
+      // 否则执行标准 JSON 模板渲染
+      if (currentTemplate) {
+        importer.renderTemplateLayers(ctx, currentTemplate, getCurrentData(), KinsokuEngine);
+      }
+    });
+
+    // 载入内置模板
+    async function loadPresetTemplates() {
+      try {
+        const [minRes, clsRes, drkRes] = await Promise.all([
+          fetch('templates/minimal-editorial.json'),
+          fetch('templates/classic-cjk.json'),
+          fetch('templates/dark-mode-card.json')
+        ]);
+        PRESET_TEMPLATES.minimal = await minRes.json();
+        PRESET_TEMPLATES.classic = await clsRes.json();
+        PRESET_TEMPLATES.dark = await drkRes.json();
+        currentTemplate = PRESET_TEMPLATES.minimal;
+        compositor.render();
+      } catch (err) {
+        console.warn('Fetch fallback to inline minimal template');
+      }
+    }
+
+    // 模板切换事件
+    document.querySelectorAll('.template-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const key = btn.dataset.template;
+        externalSvgImage = null; // 清空外部 SVG
+        if (PRESET_TEMPLATES[key]) {
+          currentTemplate = PRESET_TEMPLATES[key];
+          compositor.render();
+        }
+      });
+    });
+
+    // 滑块联动事件
+    imgOffsetXInput.addEventListener('input', (e) => {
+      compositor.setTransform(parseInt(e.target.value, 10), null, null);
+    });
+    imgOffsetYInput.addEventListener('input', (e) => {
+      compositor.setTransform(null, parseInt(e.target.value, 10), null);
+    });
+    imgZoomInput.addEventListener('input', (e) => {
+      compositor.setTransform(null, null, parseInt(e.target.value, 10));
+    });
+
+    resetImgTransformBtn.addEventListener('click', () => {
+      compositor.resetTransform();
+      showToast('已重置图像位置与缩放');
+    });
+
+    // 实时文案输入联动
+    [inputNumber, inputTopic, inputContent, inputSubtext, inputGreeting, inputSignature].forEach(el => {
+      el.addEventListener('input', () => {
+        updatePrompt();
+        compositor.render();
+      });
+    });
+
+    promptModeSelect.addEventListener('change', updatePrompt);
+
+    // 本地底图上传与拖拽
+    uploadTrigger.addEventListener('click', () => bgFileInput.click());
+    bgFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      compositor.loadImageFromFile(file).then(() => {
+        showToast('本地底图载入成功');
+      });
+    });
+
+    uploadTrigger.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadTrigger.style.borderColor = '#38bdf8';
+    });
+    uploadTrigger.addEventListener('dragleave', () => {
+      uploadTrigger.style.borderColor = '#222a36';
+    });
+    uploadTrigger.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadTrigger.style.borderColor = '#222a36';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        compositor.loadImageFromFile(e.dataTransfer.files[0]).then(() => {
+          showToast('拖拽底图载入成功');
+        });
+      }
+    });
+
+    // 全局剪贴板粘贴
+    window.addEventListener('paste', (e) => {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            compositor.loadImageFromFile(file).then(() => {
+              showToast('已从剪贴板粘贴底图');
+            });
+            return;
+          }
+        }
+      }
+    });
+
+    // 外部设计导入 (SVG 或 JSON)
+    function triggerDesignImport() {
+      designFileInput.click();
+    }
+    importDesignBtn.addEventListener('click', triggerDesignImport);
+    mobileImportBtn.addEventListener('click', triggerDesignImport);
+
+    designFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.name.endsWith('.svg')) {
+        const svgText = await file.text();
+        try {
+          externalSvgImage = await importer.parseAndRenderSVG(svgText, getCurrentData());
+          compositor.render();
+          showToast(`已成功导入 SVG 外部设计：${file.name}`);
+        } catch (err) {
+          alert('SVG 解析失败: ' + err.message);
+        }
+      } else if (file.name.endsWith('.json')) {
+        try {
+          const schema = await importer.loadTemplateJSON(file);
+          currentTemplate = schema;
+          externalSvgImage = null;
+          compositor.render();
+          showToast(`已成功导入 JSON 模板：${schema.name || file.name}`);
+        } catch (err) {
+          alert('JSON 模板加载失败: ' + err.message);
+        }
+      }
+    });
+
+    // 提示词复制
+    document.getElementById('copyPromptBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(promptOutput.textContent).then(() => {
+        showToast('📷 已复制无文字写实 Prompt');
+      });
+    });
+
+    // 海报导出
+    function handleExport() {
+      const fileName = `${inputNumber.value.replace(/[^a-zA-Z0-9_\u4e00-\u9fa5]/g, '_')}_${inputTopic.value}_Poster.jpg`;
+      compositor.export(fileName).then(() => {
+        showToast('已开始下载 1152×2048 高清海报');
+      });
+    }
+
+    exportBtn.addEventListener('click', handleExport);
+    mobileExportBtn.addEventListener('click', handleExport);
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // 启动初始化
+    loadPresetTemplates();
+    updatePrompt();
+  </script>
+</body>
+</html>

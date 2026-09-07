@@ -1,0 +1,103 @@
+{
+  "name": "金石宋韵竖排版 (Classical CJK)",
+  "version": "1.0.0",
+  "description": "传统宣纸金石风骨，右侧古典竖排与中央大标题，适合文创与非遗",
+  "dimensions": {
+    "width": 1152,
+    "height": 2048
+  },
+  "layers": [
+    {
+      "id": "full_vignette",
+      "type": "gradient",
+      "direction": "vertical",
+      "y": 0,
+      "height": 2048,
+      "stops": [
+        { "offset": 0, "color": "rgba(10, 15, 12, 0.45)" },
+        { "offset": 0.45, "color": "rgba(10, 15, 12, 0.7)" },
+        { "offset": 0.8, "color": "rgba(8, 12, 10, 0.95)" },
+        { "offset": 1, "color": "rgba(8, 12, 10, 0.98)" }
+      ]
+    },
+    {
+      "id": "vertical_greeting",
+      "type": "text",
+      "binding": "greeting",
+      "orientation": "vertical",
+      "x": 1050,
+      "y": 280,
+      "maxBottomY": 1200,
+      "fontSize": 34,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "600",
+      "color": "#ecd29b",
+      "charSpacing": 14,
+      "columnSpacing": 45
+    },
+    {
+      "id": "eyebrow_cjk",
+      "type": "text",
+      "binding": "number",
+      "x": 120,
+      "y": 920,
+      "fontSize": 24,
+      "fontFamily": "system-ui, sans-serif",
+      "fontWeight": "600",
+      "color": "rgba(220, 192, 126, 0.85)",
+      "align": "left"
+    },
+    {
+      "id": "topic_cjk",
+      "type": "text",
+      "binding": "topic",
+      "x": 120,
+      "y": 1050,
+      "fontSize": 88,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "900",
+      "color": "#ffffff",
+      "align": "left"
+    },
+    {
+      "id": "content_cjk",
+      "type": "text",
+      "binding": "content",
+      "x": 120,
+      "y": 1200,
+      "fontSize": 34,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "500",
+      "color": "#e2e8f0",
+      "align": "left",
+      "maxWidth": 860,
+      "lineHeight": 62
+    },
+    {
+      "id": "subtext_cjk",
+      "type": "text",
+      "binding": "subtext",
+      "x": 120,
+      "y": 1420,
+      "fontSize": 28,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "600",
+      "color": "#dcc07e",
+      "align": "left",
+      "maxWidth": 860,
+      "lineHeight": 52
+    },
+    {
+      "id": "footer_cjk_sign",
+      "type": "text",
+      "binding": "signature",
+      "x": 120,
+      "y": 1880,
+      "fontSize": 34,
+      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontWeight": "700",
+      "color": "#dcc07e",
+      "align": "left"
+    }
+  ]
+}
