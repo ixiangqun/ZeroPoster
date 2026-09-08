@@ -1,7 +1,7 @@
 {
   "name": "极客暗黑金句版 (Dark Mode Card)",
-  "version": "1.0.0",
-  "description": "现代冷调工业风，适合读书笔记、播客金句与极客观点分享",
+  "version": "1.1.0",
+  "description": "现代冷调工业风，适合读书笔记、播客金句与极客观点分享。署名与注解跟随金句流动排布。",
   "dimensions": {
     "width": 1152,
     "height": 2048
@@ -37,10 +37,12 @@
       "x": 230,
       "y": 273,
       "fontSize": 20,
-      "fontFamily": "ui-monospace, monospace",
+      "fontFamily": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
       "fontWeight": "700",
       "color": "#38bdf8",
-      "align": "center"
+      "align": "center",
+      "maxWidth": 240,
+      "maxLines": 1
     },
     {
       "id": "quote_mark",
@@ -49,10 +51,12 @@
       "x": 100,
       "y": 620,
       "fontSize": 180,
-      "fontFamily": "Georgia, serif",
+      "fontFamily": "Georgia, 'Times New Roman', serif",
       "fontWeight": "900",
       "color": "rgba(56, 189, 248, 0.25)",
-      "align": "left"
+      "align": "left",
+      "maxLines": 1,
+      "normalizePunctuation": false
     },
     {
       "id": "core_quote",
@@ -61,38 +65,47 @@
       "x": 100,
       "y": 720,
       "fontSize": 48,
-      "fontFamily": "-apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
       "fontWeight": "800",
       "color": "#ffffff",
       "align": "left",
       "maxWidth": 950,
-      "lineHeight": 80
+      "lineHeight": 80,
+      "maxBottomY": 1320
     },
     {
       "id": "author_title",
       "type": "text",
       "binding": "topic",
+      "flow": true,
+      "flowGap": 128,
       "x": 100,
       "y": 1400,
       "fontSize": 36,
-      "fontFamily": "-apple-system, sans-serif",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
       "fontWeight": "700",
       "color": "#38bdf8",
-      "align": "left"
+      "align": "left",
+      "maxWidth": 950,
+      "lineHeight": 52,
+      "maxLines": 2
     },
     {
       "id": "sub_context",
       "type": "text",
       "binding": "subtext",
+      "flow": true,
+      "flowGap": 76,
       "x": 100,
       "y": 1480,
       "fontSize": 26,
-      "fontFamily": "-apple-system, sans-serif",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif",
       "fontWeight": "400",
       "color": "#94a3b8",
       "align": "left",
       "maxWidth": 950,
-      "lineHeight": 44
+      "lineHeight": 44,
+      "maxBottomY": 1790
     },
     {
       "id": "footer_sign",
@@ -101,10 +114,12 @@
       "x": 100,
       "y": 1880,
       "fontSize": 30,
-      "fontFamily": "ui-monospace, monospace",
+      "fontFamily": "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
       "fontWeight": "600",
       "color": "#64748b",
-      "align": "left"
+      "align": "left",
+      "maxWidth": 950,
+      "maxLines": 1
     }
   ]
 }

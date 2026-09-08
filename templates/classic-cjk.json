@@ -1,7 +1,7 @@
 {
   "name": "金石宋韵竖排版 (Classical CJK)",
-  "version": "1.0.0",
-  "description": "传统宣纸金石风骨，右侧古典竖排与中央大标题，适合文创与非遗",
+  "version": "1.1.0",
+  "description": "传统宣纸金石风骨，右侧古典竖排与左下大标题，适合文创与非遗。竖排文本受安全区约束，超出自动截断。",
   "dimensions": {
     "width": 1152,
     "height": 2048
@@ -25,11 +25,12 @@
       "type": "text",
       "binding": "greeting",
       "orientation": "vertical",
+      "columns": "auto",
       "x": 1050,
       "y": 280,
       "maxBottomY": 1200,
       "fontSize": 34,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "600",
       "color": "#ecd29b",
       "charSpacing": 14,
@@ -45,7 +46,9 @@
       "fontFamily": "system-ui, sans-serif",
       "fontWeight": "600",
       "color": "rgba(220, 192, 126, 0.85)",
-      "align": "left"
+      "align": "left",
+      "maxWidth": 900,
+      "maxLines": 1
     },
     {
       "id": "topic_cjk",
@@ -54,38 +57,47 @@
       "x": 120,
       "y": 1050,
       "fontSize": 88,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "900",
       "color": "#ffffff",
-      "align": "left"
+      "align": "left",
+      "maxWidth": 900,
+      "lineHeight": 116,
+      "maxBottomY": 1166
     },
     {
       "id": "content_cjk",
       "type": "text",
       "binding": "content",
+      "flow": true,
+      "flowGap": 116,
       "x": 120,
       "y": 1200,
       "fontSize": 34,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "500",
       "color": "#e2e8f0",
       "align": "left",
-      "maxWidth": 860,
-      "lineHeight": 62
+      "maxWidth": 900,
+      "lineHeight": 62,
+      "maxBottomY": 1560
     },
     {
       "id": "subtext_cjk",
       "type": "text",
       "binding": "subtext",
+      "flow": true,
+      "flowGap": 90,
       "x": 120,
       "y": 1420,
       "fontSize": 28,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "600",
       "color": "#dcc07e",
       "align": "left",
-      "maxWidth": 860,
-      "lineHeight": 52
+      "maxWidth": 900,
+      "lineHeight": 52,
+      "maxBottomY": 1740
     },
     {
       "id": "footer_cjk_sign",
@@ -94,10 +106,12 @@
       "x": 120,
       "y": 1880,
       "fontSize": 34,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "700",
       "color": "#dcc07e",
-      "align": "left"
+      "align": "left",
+      "maxWidth": 900,
+      "maxLines": 1
     }
   ]
 }

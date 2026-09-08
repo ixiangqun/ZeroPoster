@@ -1,0 +1,36 @@
+{
+  "name": "zeroposter",
+  "version": "1.1.0",
+  "description": "零后端、零 API 成本的纯客户端海报排版与合成引擎，内置 CJK 换行禁则排印。",
+  "keywords": [
+    "poster",
+    "canvas",
+    "typography",
+    "kinsoku",
+    "cjk",
+    "client-side",
+    "zero-backend"
+  ],
+  "license": "MIT",
+  "type": "commonjs",
+  "private": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build:presets": "node tools/build-presets.mjs",
+    "check:presets": "node tools/build-presets.mjs --check",
+    "test": "node --test test/*.test.mjs",
+    "test:watch": "node --test --watch test/*.test.mjs",
+    "verify": "npm run check:presets && npm test",
+    "serve": "node tools/serve.mjs"
+  },
+  "files": [
+    "index.html",
+    "core/",
+    "templates/",
+    "schemas/",
+    "sample-design.svg"
+  ],
+  "devDependencies": {}
+}

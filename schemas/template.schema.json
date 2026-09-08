@@ -1,72 +1,146 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/ZeroPoster/schemas/template.schema.json",
   "title": "ZeroPosterTemplate",
-  "description": "ZeroPoster 标准海报模板描述协议",
+  "description": "ZeroPoster 海报模板描述协议。运行时的等价校验实现见 core/DesignImporter.js 的 validateTemplate()，两者由 test/schema-sync.test.mjs 断言保持一致。",
   "type": "object",
   "required": ["name", "version", "dimensions", "layers"],
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "模板名称"
-    },
-    "version": {
-      "type": "string",
-      "description": "模板协议版本，如 1.0.0"
-    },
-    "description": {
-      "type": "string"
-    },
+    "name": { "type": "string", "description": "模板名称" },
+    "version": { "type": "string", "description": "模板协议版本，如 1.1.0" },
+    "description": { "type": "string" },
     "dimensions": {
       "type": "object",
       "required": ["width", "height"],
       "properties": {
-        "width": { "type": "integer", "default": 1152 },
-        "height": { "type": "integer", "default": 2048 }
+        "width": { "type": "number", "exclusiveMinimum": 0, "default": 1152 },
+        "height": { "type": "number", "exclusiveMinimum": 0, "default": 2048 }
       }
     },
     "layers": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "type"],
-        "properties": {
-          "id": { "type": "string" },
-          "type": {
-            "type": "string",
-            "enum": ["text", "gradient", "line", "rect", "image"]
-          },
-          "binding": {
-            "type": "string",
-            "description": "动态数据绑定槽位键名，如 title, content, greeting, date"
-          },
-          "x": { "type": "number" },
-          "y": { "type": "number" },
-          "width": { "type": "number" },
-          "height": { "type": "number" },
-          "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
-          "orientation": {
-            "type": "string",
-            "enum": ["horizontal", "vertical"]
-          },
-          "fontSize": { "type": "number" },
-          "fontFamily": { "type": "string" },
-          "fontWeight": { "type": "string" },
-          "color": { "type": "string" },
-          "align": { "type": "string", "enum": ["left", "center", "right"] },
-          "lineHeight": { "type": "number" },
-          "maxWidth": { "type": "number" },
-          "stops": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "offset": { "type": "number" },
-                "color": { "type": "string" }
-              }
+      "items": { "$ref": "#/definitions/layer" }
+    }
+  },
+  "definitions": {
+    "layer": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "type": "string",
+          "enum": ["text", "gradient", "line", "rect"]
+        },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+
+        "flow": {
+          "type": "boolean",
+          "description": "为 true 时，本图层的 y 由上一个可测量图层的底部 + flowGap 决定，而不是使用自身的 y。这是长文案不压盖下方图层的关键。"
+        },
+        "flowGap": {
+          "type": "number",
+          "description": "流式布局中，本图层首行基线与上一图层末行基线之间的距离。"
+        },
+
+        "x": { "type": "number" },
+        "y": { "type": "number", "description": "非流式图层的绝对坐标；文本图层为首行基线位置。" },
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+
+        "binding": {
+          "type": "string",
+          "description": "动态数据槽位键名，如 number / topic / content / subtext / greeting / signature"
+        },
+        "content": { "type": "string", "description": "静态文本，binding 缺省时使用" },
+
+        "orientation": { "type": "string", "enum": ["horizontal", "vertical"] },
+        "align": { "type": "string", "enum": ["left", "center", "right"] },
+        "fontSize": { "type": "number" },
+        "fontFamily": { "type": "string" },
+        "fontWeight": { "type": "string" },
+        "fontStyle": { "type": "string" },
+        "color": { "type": "string" },
+        "lineHeight": { "type": "number" },
+        "maxWidth": { "type": "number" },
+        "maxLines": {
+          "type": "number",
+          "description": "最大行数，超出部分截断并追加省略号。"
+        },
+        "maxBottomY": {
+          "type": "number",
+          "description": "安全区下边界。横排会换算成最大行数，竖排会限制列高，超出一律截断而不是越界绘制。"
+        },
+        "normalizePunctuation": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否对半角标点做全角归一化。"
+        },
+        "columns": {
+          "oneOf": [
+            { "type": "number", "minimum": 1 },
+            { "type": "string", "enum": ["auto"] }
+          ],
+          "description": "竖排列数，auto 表示按安全区所需的最少列数。"
+        },
+        "charSpacing": { "type": "number", "description": "竖排字间距" },
+        "columnSpacing": { "type": "number", "description": "竖排列间距" },
+
+        "shadow": {
+          "type": "object",
+          "properties": {
+            "color": { "type": "string" },
+            "blur": { "type": "number" },
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+
+        "direction": { "type": "string", "enum": ["vertical", "horizontal"] },
+        "stops": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": ["offset", "color"],
+            "properties": {
+              "offset": { "type": "number", "minimum": 0, "maximum": 1 },
+              "color": { "type": "string", "minLength": 1 }
             }
           }
+        },
+
+        "x1": { "type": "number" },
+        "y1": { "type": "number" },
+        "x2": { "type": "number" },
+        "y2": { "type": "number" },
+        "lineWidth": { "type": "number" },
+
+        "fill": { "type": "string" },
+        "stroke": { "type": "string" },
+        "strokeWidth": { "type": "number" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "gradient" } }, "required": ["type"] },
+          "then": { "required": ["stops"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "text" } }, "required": ["type"] },
+          "then": {
+            "required": ["x"],
+            "anyOf": [{ "required": ["binding"] }, { "required": ["content"] }]
+          }
+        },
+        {
+          "if": { "properties": { "type": { "const": "line" } }, "required": ["type"] },
+          "then": { "required": ["x1", "x2"] }
+        },
+        {
+          "if": { "properties": { "type": { "const": "rect" } }, "required": ["type"] },
+          "then": { "required": ["x", "width", "height"] }
         }
-      }
+      ]
     }
   }
 }
