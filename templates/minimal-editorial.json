@@ -1,7 +1,7 @@
 {
   "name": "极简大片版 (Editorial Minimal)",
-  "version": "1.0.0",
-  "description": "无界全屏通透大片版，适合小红书、杂志风与现代生活方式分享",
+  "version": "1.1.0",
+  "description": "无界全屏通透大片版，适合小红书、杂志风与现代生活方式分享。正文与副标题采用流式布局，长文案不会压盖页脚。",
   "dimensions": {
     "width": 1152,
     "height": 2048
@@ -41,7 +41,9 @@
       "fontFamily": "system-ui, sans-serif",
       "fontWeight": "600",
       "color": "rgba(220, 192, 126, 0.9)",
-      "align": "center"
+      "align": "center",
+      "maxWidth": 900,
+      "maxLines": 1
     },
     {
       "id": "main_title",
@@ -50,40 +52,49 @@
       "x": 576,
       "y": 1080,
       "fontSize": 90,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "900",
       "color": "#ffffff",
       "align": "center",
+      "maxWidth": 940,
+      "lineHeight": 118,
+      "maxBottomY": 1198,
       "shadow": { "color": "rgba(0,0,0,0.8)", "blur": 16, "y": 6 }
     },
     {
       "id": "body_text",
       "type": "text",
       "binding": "content",
+      "flow": true,
+      "flowGap": 108,
       "x": 576,
-      "y": 1240,
+      "y": 1306,
       "fontSize": 33,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "500",
       "color": "#f1f5f9",
       "align": "center",
       "maxWidth": 860,
       "lineHeight": 60,
+      "maxBottomY": 1560,
       "shadow": { "color": "rgba(0,0,0,0.6)", "blur": 8, "y": 2 }
     },
     {
       "id": "sub_endorsement",
       "type": "text",
       "binding": "subtext",
+      "flow": true,
+      "flowGap": 92,
       "x": 576,
       "y": 1460,
       "fontSize": 28,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "600",
       "color": "#dcc07e",
       "align": "center",
       "maxWidth": 860,
-      "lineHeight": 54
+      "lineHeight": 54,
+      "maxBottomY": 1700
     },
     {
       "id": "divider_line",
@@ -102,10 +113,12 @@
       "x": 576,
       "y": 1835,
       "fontSize": 38,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "600",
       "color": "#ffffff",
-      "align": "center"
+      "align": "center",
+      "maxWidth": 940,
+      "maxLines": 1
     },
     {
       "id": "footer_signature",
@@ -114,10 +127,12 @@
       "x": 576,
       "y": 1915,
       "fontSize": 32,
-      "fontFamily": "'Noto Serif SC', 'Songti SC', serif",
+      "fontFamily": "'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'SimSun', serif",
       "fontWeight": "700",
       "color": "#dcc07e",
-      "align": "center"
+      "align": "center",
+      "maxWidth": 940,
+      "maxLines": 1
     }
   ]
 }

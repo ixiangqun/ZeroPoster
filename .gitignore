@@ -31,3 +31,10 @@ yarn-error.log*
 temp/
 dist/
 build/
+
+# Node
+node_modules/
+package-lock.json
+
+# 截图与调试用的临时页面
+.shot.html

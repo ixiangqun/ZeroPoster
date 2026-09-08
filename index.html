@@ -3,10 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ZeroPoster · 纯客户端高保真排版与海报合成引擎</title>
+  <title>ZeroPoster · 纯客户端排版与海报合成引擎</title>
+  <!--
+    Noto Serif SC 是可选增强，不是运行前提。
+    以 media="print" 加载可避免阻塞首屏；无论它是否加载成功（离线、CDN 被墙），
+    模板的字体栈都会回落到系统自带的思源宋体 / 宋体，排版依旧可用。
+    字体就绪后 bootstrap() 会重绘一次画布，确保不会用回退字体定稿。
+  -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link id="webfontLink"
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap"
+        rel="stylesheet" media="print" onload="this.media='all'">
   <style>
     :root {
       --bg-dark: #0a0d12;
@@ -361,6 +369,16 @@
       z-index: 999;
     }
     #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.error {
+      border-left-color: #f87171;
+      background: #2a1518;
+      color: #fecaca;
+    }
+    .file-upload-box.dragging {
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.08);
+      color: #e2e8f0;
+    }
   </style>
 </head>
 <body>
@@ -369,13 +387,13 @@
     <div class="brand-box">
       <div class="brand-badge">ZeroPoster</div>
       <div>
-        <div class="brand-title">ZeroPoster · 纯客户端高保真排版与海报合成引擎</div>
+        <div class="brand-title">ZeroPoster · 纯客户端排版与海报合成引擎</div>
         <div class="brand-sub">Zero-Backend • Zero-API-Cost • CJK Kinsoku Shori • SVG Semantic Importer</div>
       </div>
     </div>
     <div class="header-actions">
       <button class="btn btn-outline" id="importDesignBtn">📂 导入外部设计 (SVG/JSON)</button>
-      <button class="btn btn-primary" id="exportBtn">📥 导出 1152×2048 高清海报</button>
+      <button class="btn btn-primary" id="exportBtn">📥 导出 1152×2048 海报</button>
     </div>
   </header>
 
@@ -407,7 +425,7 @@
           <span style="font-size: 20px;">🖼️</span>
           <span>点击选择 / 拖拽背景大片至此</span>
           <span style="font-size:11px; color:#64748b;">支持全局快捷键 <span class="kbd-tag">Ctrl + V</span> / <span class="kbd-tag">Cmd + V</span> 粘贴</span>
-          <span style="font-size:11px; color:#64748b;">支持在预览画布上<strong>单指 / 鼠标左键拖拽平移，滚轮缩放</strong></span>
+          <span style="font-size:11px; color:#64748b;">预览画布支持<strong>拖拽平移 · 滚轮 / 双指缩放</strong></span>
           <input type="file" id="bgFileInput" accept="image/*" style="display:none;">
         </div>
       </div>
@@ -451,7 +469,7 @@
       </div>
 
       <!-- 结构化数据排印表单 -->
-      <div class="section-title">3. 卡片数据排印 (GB/T 15834 避头尾)</div>
+      <div class="section-title">3. 卡片数据排印 (CJK 换行禁则)</div>
 
       <div class="grid-2">
         <div class="form-group">
@@ -492,7 +510,7 @@
       </div>
       <div class="preview-hints">
         <span>画布规格：1152 × 2048 像素 (9:16)</span>
-        <span>GB/T 15834 标点悬挂 · 绝对防画布污染</span>
+        <span>标点悬挂与避头尾 · 图片经 FileReader 转入，画布不会被污染</span>
       </div>
     </div>
   </main>
@@ -510,64 +528,91 @@
   <script src="core/CanvasCompositor.js"></script>
   <script src="core/DesignImporter.js"></script>
   <script src="core/PromptBridge.js"></script>
+  <!-- 由 tools/build-presets.mjs 从 templates/*.json 生成；内联而非 fetch，才能在 file:// 下运行 -->
+  <script src="core/Presets.js"></script>
 
   <script>
-    // 实例化核心组件
-    const canvas = document.getElementById('previewCanvas');
-    const wrapper = document.getElementById('previewWrapper');
-    const compositor = new CanvasCompositor(canvas, wrapper, {
+  (function () {
+    'use strict';
+
+    var canvas = document.getElementById('previewCanvas');
+    var wrapper = document.getElementById('previewWrapper');
+
+    var compositor = new CanvasCompositor(canvas, wrapper, {
       width: 1152,
       height: 2048,
-      onTransformChange: (st) => {
+      onTransformChange: function (st) {
         imgOffsetXInput.value = st.offsetX;
         imgOffsetYInput.value = st.offsetY;
         imgZoomInput.value = st.zoom;
         imgOffsetXVal.textContent = st.offsetX + 'px';
         imgOffsetYVal.textContent = st.offsetY + 'px';
-        imgZoomVal.textContent = st.zoom + '%';
+        imgZoomVal.textContent = Math.round(st.zoom) + '%';
       }
     });
 
-    const importer = new DesignImporter();
+    var importer = new DesignImporter();
 
-    // 预置内联模板
-    const PRESET_TEMPLATES = {
-      minimal: null,
-      classic: null,
-      dark: null
-    };
+    // 预设模板由 core/Presets.js 同步提供，不需要网络请求，file:// 下同样可用。
+    var PRESET_TEMPLATES = window.ZeroPosterPresets || {};
+    var currentTemplate = PRESET_TEMPLATES.minimal || null;
 
-    let currentTemplate = null;
-    let externalSvgImage = null;
+    // 外部 SVG 设计：保留原始文本，文案变更时重新插槽并栅格化。
+    var externalSvg = { source: null, name: '', image: null, token: 0 };
 
-    // DOM 元素引用
-    const inputNumber = document.getElementById('inputNumber');
-    const inputTopic = document.getElementById('inputTopic');
-    const inputContent = document.getElementById('inputContent');
-    const inputSubtext = document.getElementById('inputSubtext');
-    const inputGreeting = document.getElementById('inputGreeting');
-    const inputSignature = document.getElementById('inputSignature');
-    const promptModeSelect = document.getElementById('promptModeSelect');
-    const promptOutput = document.getElementById('promptOutput');
+    var inputNumber = document.getElementById('inputNumber');
+    var inputTopic = document.getElementById('inputTopic');
+    var inputContent = document.getElementById('inputContent');
+    var inputSubtext = document.getElementById('inputSubtext');
+    var inputGreeting = document.getElementById('inputGreeting');
+    var inputSignature = document.getElementById('inputSignature');
+    var promptModeSelect = document.getElementById('promptModeSelect');
+    var promptOutput = document.getElementById('promptOutput');
 
-    const imgOffsetXInput = document.getElementById('imgOffsetXInput');
-    const imgOffsetYInput = document.getElementById('imgOffsetYInput');
-    const imgZoomInput = document.getElementById('imgZoomInput');
-    const imgOffsetXVal = document.getElementById('imgOffsetXVal');
-    const imgOffsetYVal = document.getElementById('imgOffsetYVal');
-    const imgZoomVal = document.getElementById('imgZoomVal');
-    const resetImgTransformBtn = document.getElementById('resetImgTransformBtn');
+    var imgOffsetXInput = document.getElementById('imgOffsetXInput');
+    var imgOffsetYInput = document.getElementById('imgOffsetYInput');
+    var imgZoomInput = document.getElementById('imgZoomInput');
+    var imgOffsetXVal = document.getElementById('imgOffsetXVal');
+    var imgOffsetYVal = document.getElementById('imgOffsetYVal');
+    var imgZoomVal = document.getElementById('imgZoomVal');
+    var resetImgTransformBtn = document.getElementById('resetImgTransformBtn');
 
-    const uploadTrigger = document.getElementById('uploadTrigger');
-    const bgFileInput = document.getElementById('bgFileInput');
-    const designFileInput = document.getElementById('designFileInput');
-    const importDesignBtn = document.getElementById('importDesignBtn');
-    const mobileImportBtn = document.getElementById('mobileImportBtn');
-    const exportBtn = document.getElementById('exportBtn');
-    const mobileExportBtn = document.getElementById('mobileExportBtn');
-    const toast = document.getElementById('toast');
+    var uploadTrigger = document.getElementById('uploadTrigger');
+    var bgFileInput = document.getElementById('bgFileInput');
+    var designFileInput = document.getElementById('designFileInput');
+    var importDesignBtn = document.getElementById('importDesignBtn');
+    var mobileImportBtn = document.getElementById('mobileImportBtn');
+    var exportBtn = document.getElementById('exportBtn');
+    var mobileExportBtn = document.getElementById('mobileExportBtn');
+    var toast = document.getElementById('toast');
 
-    // 组装当前业务数据表
+    var TEXT_INPUTS = [inputNumber, inputTopic, inputContent,
+                       inputSubtext, inputGreeting, inputSignature];
+
+    /* ---------------------------------------------------------------- 工具 */
+
+    var toastTimer = 0;
+    function showToast(message, kind) {
+      toast.textContent = message;
+      toast.className = kind === 'error' ? 'show error' : 'show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toast.className = ''; }, 3200);
+    }
+
+    function showError(message) {
+      showToast(message, 'error');
+    }
+
+    function debounce(fn, wait) {
+      var timer = 0;
+      return function () {
+        var args = arguments;
+        var self = this;
+        clearTimeout(timer);
+        timer = setTimeout(function () { fn.apply(self, args); }, wait);
+      };
+    }
+
     function getCurrentData() {
       return {
         number: inputNumber.value,
@@ -579,194 +624,288 @@
       };
     }
 
-    // 更新 AI 提示词显示
-    function updatePrompt() {
-      const mode = promptModeSelect.value;
-      const prompt = PromptBridge.buildPrompt({
-        topic: inputTopic.value,
-        visual: inputContent.value,
-        mode: mode
-      });
-      promptOutput.textContent = prompt;
-    }
+    /* ------------------------------------------------------------ 渲染管线 */
 
-    // 注册渲染管线
-    compositor.setRenderPipeline((ctx, width, height) => {
-      // 若有外部导入的 SVG 设计图像，优先绘制
-      if (externalSvgImage) {
-        ctx.drawImage(externalSvgImage, 0, 0, width, height);
+    compositor.setRenderPipeline(function (ctx, width, height) {
+      if (externalSvg.image) {
+        ctx.drawImage(externalSvg.image, 0, 0, width, height);
         return;
       }
-
-      // 否则执行标准 JSON 模板渲染
       if (currentTemplate) {
         importer.renderTemplateLayers(ctx, currentTemplate, getCurrentData(), KinsokuEngine);
       }
     });
 
-    // 载入内置模板
-    async function loadPresetTemplates() {
-      try {
-        const [minRes, clsRes, drkRes] = await Promise.all([
-          fetch('templates/minimal-editorial.json'),
-          fetch('templates/classic-cjk.json'),
-          fetch('templates/dark-mode-card.json')
-        ]);
-        PRESET_TEMPLATES.minimal = await minRes.json();
-        PRESET_TEMPLATES.classic = await clsRes.json();
-        PRESET_TEMPLATES.dark = await drkRes.json();
-        currentTemplate = PRESET_TEMPLATES.minimal;
-        compositor.render();
-      } catch (err) {
-        console.warn('Fetch fallback to inline minimal template');
-      }
+    /* -------------------------------------------------- 外部 SVG 插槽重绘 */
+
+    // 导入 SVG 后继续编辑文案时，必须重新插槽并栅格化，
+    // 否则画面会停留在导入那一刻的静态图上。
+    function refreshExternalSvg() {
+      if (!externalSvg.source) return;
+      var token = ++externalSvg.token;
+      importer.parseAndRenderSVG(externalSvg.source, getCurrentData())
+        .then(function (img) {
+          if (token !== externalSvg.token) return; // 已有更新的一次重绘
+          externalSvg.image = img;
+          compositor.requestRender();
+        })
+        .catch(function (err) {
+          showError('SVG 重绘失败：' + err.message);
+        });
+    }
+    var refreshExternalSvgDebounced = debounce(refreshExternalSvg, 180);
+
+    function clearExternalSvg() {
+      externalSvg.source = null;
+      externalSvg.name = '';
+      externalSvg.image = null;
+      externalSvg.token++;
     }
 
-    // 模板切换事件
-    document.querySelectorAll('.template-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const key = btn.dataset.template;
-        externalSvgImage = null; // 清空外部 SVG
-        if (PRESET_TEMPLATES[key]) {
-          currentTemplate = PRESET_TEMPLATES[key];
-          compositor.render();
+    /* ---------------------------------------------------------- 提示词桥接 */
+
+    function updatePrompt() {
+      promptOutput.textContent = PromptBridge.buildPrompt({
+        topic: inputTopic.value,
+        visual: inputContent.value,
+        mode: promptModeSelect.value
+      });
+    }
+
+    /* ------------------------------------------------------------ 事件绑定 */
+
+    document.querySelectorAll('.template-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var key = btn.dataset.template;
+        if (!PRESET_TEMPLATES[key]) {
+          showError('模板 "' + key + '" 未载入，请检查 core/Presets.js');
+          return;
         }
+        document.querySelectorAll('.template-btn').forEach(function (b) {
+          b.classList.remove('active');
+        });
+        btn.classList.add('active');
+        clearExternalSvg();
+        currentTemplate = PRESET_TEMPLATES[key];
+        compositor.requestRender();
       });
     });
 
-    // 滑块联动事件
-    imgOffsetXInput.addEventListener('input', (e) => {
+    imgOffsetXInput.addEventListener('input', function (e) {
       compositor.setTransform(parseInt(e.target.value, 10), null, null);
     });
-    imgOffsetYInput.addEventListener('input', (e) => {
+    imgOffsetYInput.addEventListener('input', function (e) {
       compositor.setTransform(null, parseInt(e.target.value, 10), null);
     });
-    imgZoomInput.addEventListener('input', (e) => {
+    imgZoomInput.addEventListener('input', function (e) {
       compositor.setTransform(null, null, parseInt(e.target.value, 10));
     });
 
-    resetImgTransformBtn.addEventListener('click', () => {
+    resetImgTransformBtn.addEventListener('click', function () {
       compositor.resetTransform();
       showToast('已重置图像位置与缩放');
     });
 
-    // 实时文案输入联动
-    [inputNumber, inputTopic, inputContent, inputSubtext, inputGreeting, inputSignature].forEach(el => {
-      el.addEventListener('input', () => {
+    TEXT_INPUTS.forEach(function (el) {
+      el.addEventListener('input', function () {
         updatePrompt();
-        compositor.render();
+        if (externalSvg.source) {
+          refreshExternalSvgDebounced();
+        } else {
+          compositor.requestRender();
+        }
       });
     });
 
     promptModeSelect.addEventListener('change', updatePrompt);
 
-    // 本地底图上传与拖拽
-    uploadTrigger.addEventListener('click', () => bgFileInput.click());
-    bgFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      compositor.loadImageFromFile(file).then(() => {
-        showToast('本地底图载入成功');
-      });
+    /* ------------------------------------------------------------ 底图载入 */
+
+    function loadBackground(file, successMessage) {
+      compositor.loadImageFromFile(file)
+        .then(function () { showToast(successMessage); })
+        .catch(function (err) { showError(err.message); });
+    }
+
+    uploadTrigger.addEventListener('click', function () { bgFileInput.click(); });
+
+    bgFileInput.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (file) loadBackground(file, '本地底图载入成功');
+      e.target.value = ''; // 允许重复选择同一个文件
     });
 
-    uploadTrigger.addEventListener('dragover', (e) => {
+    uploadTrigger.addEventListener('dragover', function (e) {
       e.preventDefault();
-      uploadTrigger.style.borderColor = '#38bdf8';
+      uploadTrigger.classList.add('dragging');
     });
-    uploadTrigger.addEventListener('dragleave', () => {
-      uploadTrigger.style.borderColor = '#222a36';
+    uploadTrigger.addEventListener('dragleave', function () {
+      uploadTrigger.classList.remove('dragging');
     });
-    uploadTrigger.addEventListener('drop', (e) => {
+    uploadTrigger.addEventListener('drop', function (e) {
       e.preventDefault();
-      uploadTrigger.style.borderColor = '#222a36';
+      uploadTrigger.classList.remove('dragging');
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        compositor.loadImageFromFile(e.dataTransfer.files[0]).then(() => {
-          showToast('拖拽底图载入成功');
-        });
+        loadBackground(e.dataTransfer.files[0], '拖拽底图载入成功');
       }
     });
 
-    // 全局剪贴板粘贴
-    window.addEventListener('paste', (e) => {
-      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf('image') !== -1) {
-          const file = items[i].getAsFile();
+    window.addEventListener('paste', function (e) {
+      var clipboard = e.clipboardData || window.clipboardData;
+      if (!clipboard || !clipboard.items) return;
+      for (var i = 0; i < clipboard.items.length; i++) {
+        if (clipboard.items[i].type.indexOf('image') !== -1) {
+          var file = clipboard.items[i].getAsFile();
           if (file) {
             e.preventDefault();
-            compositor.loadImageFromFile(file).then(() => {
-              showToast('已从剪贴板粘贴底图');
-            });
+            loadBackground(file, '已从剪贴板粘贴底图');
             return;
           }
         }
       }
     });
 
-    // 外部设计导入 (SVG 或 JSON)
-    function triggerDesignImport() {
-      designFileInput.click();
-    }
+    /* -------------------------------------------------------- 外部设计导入 */
+
+    function triggerDesignImport() { designFileInput.click(); }
     importDesignBtn.addEventListener('click', triggerDesignImport);
     mobileImportBtn.addEventListener('click', triggerDesignImport);
 
-    designFileInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
+    designFileInput.addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      e.target.value = '';
       if (!file) return;
 
-      if (file.name.endsWith('.svg')) {
-        const svgText = await file.text();
-        try {
-          externalSvgImage = await importer.parseAndRenderSVG(svgText, getCurrentData());
-          compositor.render();
-          showToast(`已成功导入 SVG 外部设计：${file.name}`);
-        } catch (err) {
-          alert('SVG 解析失败: ' + err.message);
-        }
-      } else if (file.name.endsWith('.json')) {
-        try {
-          const schema = await importer.loadTemplateJSON(file);
-          currentTemplate = schema;
-          externalSvgImage = null;
-          compositor.render();
-          showToast(`已成功导入 JSON 模板：${schema.name || file.name}`);
-        } catch (err) {
-          alert('JSON 模板加载失败: ' + err.message);
-        }
+      var name = file.name.toLowerCase();
+
+      if (name.endsWith('.svg')) {
+        file.text().then(function (svgText) {
+          externalSvg.source = svgText;
+          externalSvg.name = file.name;
+          externalSvg.token++;
+          return importer.parseAndRenderSVG(svgText, getCurrentData());
+        }).then(function (img) {
+          externalSvg.image = img;
+          compositor.requestRender();
+          showToast('已导入 SVG 设计：' + file.name + '（文案仍可继续编辑）');
+        }).catch(function (err) {
+          clearExternalSvg();
+          compositor.requestRender();
+          showError('SVG 导入失败：' + err.message);
+        });
+        return;
       }
+
+      if (name.endsWith('.json')) {
+        importer.loadTemplateJSON(file).then(function (schema) {
+          clearExternalSvg();
+          currentTemplate = schema;
+          document.querySelectorAll('.template-btn').forEach(function (b) {
+            b.classList.remove('active');
+          });
+          compositor.requestRender();
+          showToast('已导入 JSON 模板：' + (schema.name || file.name));
+        }).catch(function (err) {
+          showError(err.message);
+        });
+        return;
+      }
+
+      showError('仅支持 .svg 与 .json 文件');
     });
 
-    // 提示词复制
-    document.getElementById('copyPromptBtn').addEventListener('click', () => {
-      navigator.clipboard.writeText(promptOutput.textContent).then(() => {
-        showToast('📷 已复制无文字写实 Prompt');
-      });
+    /* ------------------------------------------------------------ 复制导出 */
+
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      }
+      return Promise.reject(new Error('clipboard api unavailable'));
+    }
+
+    // file:// 与非安全上下文下 navigator.clipboard 可能不可用，需要保底方案。
+    function copyTextFallback(text) {
+      var area = document.createElement('textarea');
+      area.value = text;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      document.body.removeChild(area);
+      return ok;
+    }
+
+    document.getElementById('copyPromptBtn').addEventListener('click', function () {
+      var text = promptOutput.textContent;
+      copyText(text)
+        .then(function () { showToast('已复制无文字写实 Prompt'); })
+        .catch(function () {
+          if (copyTextFallback(text)) {
+            showToast('已复制无文字写实 Prompt');
+          } else {
+            showError('复制失败，请手动选中提示词文本复制');
+          }
+        });
     });
 
-    // 海报导出
+    // 文件名可能包含在各平台非法的字符，需要整体净化而不只是净化其中一段。
+    function sanitizeFileName(name) {
+      var cleaned = String(name)
+        .replace(/[\u0000-\u001f\u007f\\/:*?"<>|]/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/_{2,}/g, '_')
+        .replace(/^[_.]+|[_.]+$/g, '');
+      if (cleaned.length > 80) cleaned = cleaned.slice(0, 80);
+      return cleaned || 'ZeroPoster';
+    }
+
     function handleExport() {
-      const fileName = `${inputNumber.value.replace(/[^a-zA-Z0-9_\u4e00-\u9fa5]/g, '_')}_${inputTopic.value}_Poster.jpg`;
-      compositor.export(fileName).then(() => {
-        showToast('已开始下载 1152×2048 高清海报');
-      });
+      var fileName = sanitizeFileName(
+        inputNumber.value + '_' + inputTopic.value + '_Poster'
+      ) + '.jpg';
+
+      compositor.export(fileName)
+        .then(function () { showToast('已开始下载 1152x2048 海报'); })
+        .catch(function (err) { showError('导出失败：' + err.message); });
     }
 
     exportBtn.addEventListener('click', handleExport);
     mobileExportBtn.addEventListener('click', handleExport);
 
-    function showToast(msg) {
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2200);
+    /* -------------------------------------------------------------- 启动 */
+
+    function bootstrap() {
+      updatePrompt();
+
+      if (!currentTemplate) {
+        showError('内置模板未载入，请确认 core/Presets.js 已正确引入');
+        compositor.render();
+        return;
+      }
+
+      compositor.render();
+
+      // 字体未就绪就渲染，画面会定稿成回退字体，因此就绪后再重绘一次。
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { compositor.requestRender(); });
+
+        // Web 字体只是可选增强：加载成功就再刷新一次，失败或超时都不影响使用。
+        if (document.fonts.load) {
+          Promise.race([
+            document.fonts.load('900 90px "Noto Serif SC"'),
+            new Promise(function (resolve) { setTimeout(resolve, 5000); })
+          ]).then(function () { compositor.requestRender(); })
+            .catch(function () { /* 离线或 CDN 不可达：回落系统宋体即可 */ });
+        }
+      }
     }
 
-    // 启动初始化
-    loadPresetTemplates();
-    updatePrompt();
+    bootstrap();
+  })();
   </script>
+
 </body>
 </html>
